@@ -7,7 +7,7 @@ const schema = a.schema({
     name: a.string(),
     bio: a.string(),
     profilePicture: a.string(),
-    role: a.enum(['USER', 'ADMIN']).required(),
+    role: a.enum(['USER', 'ADMIN']), // Removed .required()
     pageants: a.hasMany('Pageant'),
     posts: a.hasMany('Post'),
     messages: a.hasMany('Message'),
@@ -74,7 +74,6 @@ export const data = defineData({
   schema,
   authorizationModes: {
     defaultAuthorizationMode: 'userPool',
-    // Add API key for public read access
     apiKeyAuthorizationMode: { expiresInDays: 30 }
   }
 });
