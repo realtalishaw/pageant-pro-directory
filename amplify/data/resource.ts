@@ -8,12 +8,17 @@ const schema = a.schema({
     bio: a.string(),
     profilePicture: a.string(),
     role: a.enum(['USER', 'ADMIN']),
-    pageants: a.hasMany('Pageant', 'organizerId'),
+    organizedPageants: a.hasMany('Pageant', 'organizerId'),
+    participatedPageants: a.hasMany('UserPageant', 'userId'),
     posts: a.hasMany('Post', 'authorId'),
+    comments: a.hasMany('Comment', 'authorId'),
     sentMessages: a.hasMany('Message', 'senderId'),
     receivedMessages: a.hasMany('Message', 'receiverId'),
     reviews: a.hasMany('Review', 'authorId'),
-  }).authorization(allow => [allow.owner(), allow.public('read')]),
+  }).authorization(allow => [
+    allow.owner(),
+    allow.publicApiKey().to(['read'])
+  ]),
 
   Pageant: a.model({
     name: a.string().required(),
@@ -22,12 +27,28 @@ const schema = a.schema({
     location: a.string(),
     organizerId: a.string(),
     organizer: a.belongsTo('User', 'organizerId'),
-    participants: a.hasMany('User', 'pageantId'),
+    participants: a.hasMany('UserPageant', 'pageantId'),
     sponsored: a.boolean(),
     category: a.string(),
     events: a.hasMany('Event', 'pageantId'),
     reviews: a.hasMany('Review', 'pageantId'),
-  }).authorization(allow => [allow.owner(), allow.public('read')]),
+    sponsorId: a.string(),
+    sponsor: a.belongsTo('Sponsor', 'sponsorId'),
+  }).authorization(allow => [
+    allow.owner(),
+    allow.publicApiKey().to(['read'])
+  ]),
+
+  UserPageant: a.model({
+    userId: a.string(),
+    pageantId: a.string(),
+    user: a.belongsTo('User', 'userId'),
+    pageant: a.belongsTo('Pageant', 'pageantId'),
+    role: a.enum(['PARTICIPANT', 'JUDGE', 'STAFF']),
+  }).authorization(allow => [
+    allow.owner(),
+    allow.publicApiKey().to(['read'])
+  ]),
 
   Event: a.model({
     name: a.string().required(),
@@ -35,7 +56,10 @@ const schema = a.schema({
     date: a.date(),
     pageantId: a.string(),
     pageant: a.belongsTo('Pageant', 'pageantId'),
-  }).authorization(allow => [allow.owner(), allow.public('read')]),
+  }).authorization(allow => [
+    allow.owner(),
+    allow.publicApiKey().to(['read'])
+  ]),
 
   Post: a.model({
     content: a.string().required(),
@@ -43,7 +67,10 @@ const schema = a.schema({
     author: a.belongsTo('User', 'authorId'),
     likes: a.integer(),
     comments: a.hasMany('Comment', 'postId'),
-  }).authorization(allow => [allow.owner(), allow.public('read')]),
+  }).authorization(allow => [
+    allow.owner(),
+    allow.publicApiKey().to(['read'])
+  ]),
 
   Comment: a.model({
     content: a.string().required(),
@@ -51,7 +78,10 @@ const schema = a.schema({
     author: a.belongsTo('User', 'authorId'),
     postId: a.string(),
     post: a.belongsTo('Post', 'postId'),
-  }).authorization(allow => [allow.owner(), allow.public('read')]),
+  }).authorization(allow => [
+    allow.owner(),
+    allow.publicApiKey().to(['read'])
+  ]),
 
   Message: a.model({
     content: a.string().required(),
@@ -69,7 +99,10 @@ const schema = a.schema({
     author: a.belongsTo('User', 'authorId'),
     pageantId: a.string(),
     pageant: a.belongsTo('Pageant', 'pageantId'),
-  }).authorization(allow => [allow.owner(), allow.public('read')]),
+  }).authorization(allow => [
+    allow.owner(),
+    allow.publicApiKey().to(['read'])
+  ]),
 
   Sponsor: a.model({
     name: a.string().required(),
@@ -77,7 +110,10 @@ const schema = a.schema({
     logo: a.string(),
     website: a.string(),
     sponsoredPageants: a.hasMany('Pageant', 'sponsorId'),
-  }).authorization(allow => [allow.owner(), allow.public('read')]),
+  }).authorization(allow => [
+    allow.owner(),
+    allow.publicApiKey().to(['read'])
+  ]),
 });
 
 export type Schema = ClientSchema<typeof schema>;
